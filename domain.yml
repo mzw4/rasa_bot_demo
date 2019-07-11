@@ -1,0 +1,51 @@
+intents:
+  - greet
+  - goodbye
+  - affirm
+  - deny
+  - mood_great
+  - mood_unhappy
+
+actions:
+- utter_greet
+- utter_cheer_up
+- utter_did_that_help
+- utter_happy
+- utter_goodbye
+- utter_recommendation
+- utter_ask_city
+- action_recommend_poi
+
+slots:
+  city:
+    type: text
+    initial_value: "city"
+
+  place:
+    type: text
+    initial_value: "place"
+
+
+templates:
+  utter_greet:
+  - text: "Hey! How are you?"
+
+  utter_cheer_up:
+  - text: "Here is something to cheer you up:"
+    image: "https://i.imgur.com/nGF1K8f.jpg"
+
+  utter_did_that_help:
+  - text: "Did that help you?"
+
+  utter_happy:
+  - text: "Great carry on!"
+
+  utter_goodbye:
+  - text: "Bye"
+
+  utter_recommendation:
+  - text: "I can help with that! You should check out {place} :)"
+  - text: "I heard {place} is great, check it out!"
+
+  utter_ask_city:
+  - text: "What city are you looking for?"

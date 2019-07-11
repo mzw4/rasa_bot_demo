@@ -1,0 +1,149 @@
+
+################
+  Installation
+################
+
+https://rasa.com/docs/rasa/user-guide/installation/
+
+pip3 install rasa-x --extra-index-url https://pypi.rasa.com/simple
+
+pip3 install rasa[spacy]
+python3 -m spacy download en_core_web_md
+python3 -m spacy link en_core_web_md en
+
+
+################
+	Project
+################
+
+https://rasa.com/docs/rasa/user-guide/rasa-tutorial/
+
+rasa init --no-prompt
+
+
+################
+  Running rasa
+################
+
+rasa train
+rasa run -m models --enable-api --log-file out.log --endpoints endpoints.yml
+rasa shell
+rasa run actions
+
+################
+Creating the bot
+################
+
+config.yml
+pipeline: pretrained_embeddings_spacy
+
+nlu.md
+
+## intent:recommendation
+- what should i do
+- recommend me something fun to do in [denver](city)
+- recommend me something fun to do in [boston](city)
+- recommend me something in [boston](city)
+- what should i do in [denver](city)
+- what should i do in [boston](city)
+
+## intent:input_city
+- [denver](city)
+- [new york](city)
+
+stories.md
+
+## recommendation no city
+* recommendation
+  - utter_ask_city
+* input_city{"city": "boston"}
+  - action_recommend_poi
+  - utter_recommendation
+
+## recommendation
+* recommendation{"city": "boston"}
+  - action_recommend_poi
+  - utter_recommendation
+
+
+################
+     Domain
+################
+
+actions:
+- utter_recommendation
+- utter_ask_city
+- action_recommend_poi
+
+templates:
+  utter_recommendation:
+  - text: "I can help with that! You should check out {place} :)"
+  - text: "I heard {place} is great, check it out!"
+
+  utter_ask_city:
+  - text: "What city are you looking for?"
+
+
+
+################
+     Slots
+################
+
+slots:
+  city:
+    type: text
+    initial_value: "city"
+
+  place:
+    type: text
+    initial_value: "place"
+
+
+################
+ Custom actions
+################
+
+https://rasa.com/docs/rasa/core/actions/#id6
+pip install rasa-sdk
+
+endpoints.yml
+action_endpoint:
+  url: "http://localhost:5055/webhook"
+
+actions.py
+from typing import Any, Text, Dict, List
+
+from rasa_sdk import Action, Tracker
+from rasa_sdk.executor import CollectingDispatcher
+
+import sygic
+from rasa_sdk.events import SlotSet
+
+
+class ActionRecommendPointOfInterest(Action):
+
+    def name(self) -> Text:
+        return "action_recommend_poi"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+
+        city = tracker.get_slot('city')
+        print(city)
+
+        place = sygic.get_random_place_of_interest(query=city)
+
+        return [SlotSet("place", place or [])]
+
+
+################
+ Twilio connector
+################
+
+https://rasa.com/docs/rasa/user-guide/connectors/twilio/
+
+twilio:
+  account_sid: "ACa55111cf69345175c8785a41763a889c"
+  auth_token: "1d33e9b3add88753b8c2a812dd108335"
+  twilio_number: "+16178122294"
